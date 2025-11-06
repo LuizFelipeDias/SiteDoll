@@ -20,7 +20,8 @@ class AuthController extends Controller
 
         $remember = (bool) ($data['remember'] ?? false);
 
-        if (! Auth::attempt(
+        // use SEMPRE o guard 'web'
+        if (! Auth::guard('web')->attempt(
             ['email' => $data['email'], 'password' => $data['password']],
             $remember
         )) {
@@ -36,7 +37,7 @@ class AuthController extends Controller
     // GET /me
     public function me(Request $request): JsonResponse
     {
-        $u = $request->user(); // guard 'auth'
+        $u = $request->user('web');  // <- explícito
         return response()->json([
             'id'         => $u->id,
             'nome'       => $u->nome,
@@ -49,10 +50,9 @@ class AuthController extends Controller
     // POST /logout
     public function logout(Request $request): Response
     {
-        Auth::guard('auth')->logout();
+        Auth::guard('web')->logout(); // <- explícito
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
         return response()->noContent();
     }
 }
