@@ -11,7 +11,11 @@ Route::get('/', [IndexController::class, 'index']);
 
 // Login e logout (guard web, sessão)
 Route::post('/login',  [LoginController::class, 'login']);
+<<<<<<< HEAD
 Route::get('/login', [IndexController::class, 'index'])->name('login');
+=======
+Route::get('/login', [IndexController::class, 'index'])->name('login'); // << AQUI
+>>>>>>> 479b437a945bea48db3995dafac77e966fcf7320
 
 Route::post('/logout', [LogoutController::class, 'perform']);
 
