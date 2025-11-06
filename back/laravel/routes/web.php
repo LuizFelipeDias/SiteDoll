@@ -11,6 +11,8 @@ Route::get('/', [IndexController::class, 'index']);
 
 // Login e logout (guard web, sessão)
 Route::post('/login',  [LoginController::class, 'login']);
+Route::get('/login', [IndexController::class, 'index'])->name('login'); // << AQUI
+
 Route::post('/logout', [LogoutController::class, 'perform']);
 
 // Rota opcional para testar usuário autenticado via sessão
