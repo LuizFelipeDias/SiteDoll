@@ -2,51 +2,28 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-/**
- * Representa a tabela `usuarios`
- *
- * @property int         $id
- * @property string      $nome
- * @property string      $email
- * @property string      $cpf
- * @property string|null $telefone
- * @property string      $senha
- */
 class Usuario extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, Notifiable;
 
-    /** Nome da tabela */
     protected $table = 'usuarios';
 
-    /** Sua tabela não tem created_at/updated_at */
-    public $timestamps = true;
+    // << se NÃO tem created_at/updated_at, deixe false
+    public $timestamps = false;
 
-    /** Campos fillable */
-    protected $fillable = [
-        'nome',
-        'email',
-        'cpf',
-        'telefone',
-        'senha',
-    ];
+    protected $fillable = ['nome','email','cpf','telefone','senha'];
 
-    /** Ocultar senha nas respostas JSON */
-    protected $hidden = [
-        'senha',
-    ];
+    protected $hidden = ['senha', 'remember_token'];
 
-    /** Hash automático da coluna 'senha' */
+    // Cast automático (NÃO use bcrypt em controllers)
     protected $casts = [
         'senha' => 'hashed',
     ];
 
-    /** Indica ao sistema de autenticação qual campo é a senha */
     public function getAuthPassword(): string
     {
         return $this->senha;
