@@ -1,3 +1,4 @@
+// routes/web.php
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -7,25 +8,23 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\IndexController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
-
 use App\Http\Controllers\PromptController;
 use App\Http\Controllers\CategoriaController;
 
-/*
-|----------------------------------------------------------------------
-| Rotas ESPECÍFICAS primeiro (JSON)
-|----------------------------------------------------------------------
-*/
+/* -------- JSON / Sessão primeiro -------- */
 
-// Debug simples: devolve JSON (sem HTML)
+Route::post('/login',  [LoginController::class, 'login']);
+Route::get('/login',   [IndexController::class, 'index'])->name('login');
+Route::post('/logout', [LogoutController::class, 'perform']);
+
+Route::get('/me', fn (Request $r) => $r->user())->middleware('auth:web');
+
 Route::get('/_echo', function (Request $r) {
     return response()->json([
-        'ok'       => true,
-        'user_id'  => $r->user()?->id,
-        'cookies'  => $r->cookies->all(),
-        'accept'   => $r->header('Accept'),
-        'xhr'      => $r->header('X-Requested-With'),
-        'path'     => $r->path(),
+        'ok'      => true,
+        'user_id' => $r->user()?->id,
+        'path'    => $r->path(),
+        'accept'  => $r->header('Accept'),
     ]);
 })->middleware('auth:web');
 
@@ -34,41 +33,20 @@ Route::get('/_debug-db', function () {
         'database'   => config('database.connections.mysql.database'),
         'host'       => config('database.connections.mysql.host'),
         'prompts'    => DB::table('prompts')->count(),
-        'categorias' => DB::table('categorias')->count(),
+        'categorias' => DB::table('categororias')->count(),
         'tipos'      => DB::table('tipos')->count(),
     ]);
 })->middleware('auth:web');
 
-// Autenticação por sessão (guard web)
-Route::post('/login',  [LoginController::class, 'login']);
-Route::get('/login',   [IndexController::class, 'index'])->name('login');
-Route::post('/logout', [LogoutController::class, 'perform']);
-
-// Usuário autenticado (teste)
-Route::get('/me', fn (Request $r) => $r->user())->middleware('auth:web');
-
-// Leitura autenticada via sessão (SEM /api)
 Route::middleware('auth:web')->group(function () {
     Route::get('/prompts',    [PromptController::class,   'index']);
     Route::get('/categorias', [CategoriaController::class,'index']);
 });
 
-/*
-|----------------------------------------------------------------------
-| SPA (por último): DUAS opções
-|----------------------------------------------------------------------
-*/
+/* -------- SPA por último (escape das rotas JSON) -------- */
 
-/* OPÇÃO A) Montar SPA SOMENTE em /app (recomendado, evita conflitos)
-   Acesse o front por /app, e deixe /prompts /categorias como JSON.
-*/
-Route::get('/app/{any?}', [IndexController::class, 'index'])
-    ->where('any', '.*');
-
-// Página inicial simples (pode redirecionar para /app se quiser)
-Route::get('/', [IndexController::class, 'index']);
-
-/* OPÇÃO B) Se você quer catch-all geral, EXCLUA rotas críticas
+// Opção B (SPA em / também), mas EXCLUINDO caminhos de API/JSON:
 Route::get('/{any}', [IndexController::class, 'index'])
     ->where('any', '^(?!api|prompts|categorias|me|login|logout|sanctum|_echo|_debug-db).*$');
-*/
+
+// (Se preferir, use a Opção A e sirva o SPA só em /app/{any}, e deixe "/" simples.)
