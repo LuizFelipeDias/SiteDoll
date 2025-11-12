@@ -19,18 +19,6 @@ Route::post('/login',  [LoginController::class, 'login']);
 Route::get('/login', [IndexController::class, 'index'])->name('login');
 Route::post('/logout', [LogoutController::class, 'perform']);
 
-
-Route::get('/_debug-db', function () {
-    return response()->json([
-        'database' => config('database.connections.mysql.database'),
-        'host'     => config('database.connections.mysql.host'),
-        'prompts'  => DB::table('prompts')->count(),
-        'categorias' => DB::table('categorias')->count(),
-        'tipos'      => DB::table('tipos')->count(),
-    ]);
-})->middleware('auth:web');
-
-
 // Usuário autenticado (teste)
 Route::get('/me', fn (Request $r) => $r->user())->middleware('auth:web');
 
